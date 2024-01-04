@@ -5,7 +5,9 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { debounceTime, fromEvent } from 'rxjs';
+import { SelectValue } from './select/select.component';
 import { User } from './select/test/user';
 
 @Component({
@@ -23,15 +25,21 @@ export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild('input') input!: ElementRef;
 
   ngOnInit(): void {
-    setTimeout(() => {
-      this.selectValue = new User(2, 'Niels Bohr', 'niels', 'Denmark');
-    }, 5000);
+    // setTimeout(() => {
+    //   this.selectValue = new User(2, 'Niels Bohr', 'niels', 'Denmark');
+    // }, 5000);
+    this.selectValue.valueChanges.subscribe((value) => {
+      console.log(value);
+    });
   }
   title = 'custom-select-option';
   onSelectionChanged(e: any) {
     console.log(e);
   }
-  selectValue = new User(1, 'Albert Einstein', 'albert', 'Germany/USA');
+  selectValue: FormControl<SelectValue<User>> = new FormControl([
+    new User(1, 'Albert Einstein', 'albert', 'Germany/USA'),
+    new User(2, 'Niels Bohr', 'niels', 'Denmark'),
+  ]);
 
   users: User[] = [
     new User(1, 'Albert Einstein', 'albert', 'Germany/USA'),

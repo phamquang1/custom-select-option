@@ -2,8 +2,8 @@ hih
 <app-select
   [displayWith]="sisolayWithFn"
   [compareWith]="compareWithFn"
-  (selectionChanged)="onSelectionChanged($event)"
-  [value]="selectValue"
+  multiple="true"
+  [formControl]="selectValue"
 >
   <app-option [filter]="true">
     <input #input type="text" placeholder="hi" />
