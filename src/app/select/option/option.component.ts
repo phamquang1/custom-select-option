@@ -25,6 +25,10 @@ export class OptionComponent<T> {
   @HostBinding('class.selected')
   protected isSelected = false;
 
+  @HostBinding('class.sticky') get classSticky() {
+    return this.filter;
+  }
+
   @Output()
   selected = new EventEmitter<OptionComponent<T>>();
   constructor(private cd: ChangeDetectorRef) {}

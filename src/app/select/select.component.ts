@@ -18,10 +18,12 @@ import {
   HostBinding,
   HostListener,
   Input,
+  OnChanges,
   OnDestroy,
   OnInit,
   Output,
   QueryList,
+  SimpleChanges,
 } from '@angular/core';
 import { Subject, merge, startWith, switchMap, takeUntil, tap } from 'rxjs';
 import { OptionComponent } from './option/option.component';
@@ -42,9 +44,17 @@ import { OptionComponent } from './option/option.component';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SelectComponent<T> implements OnInit, AfterContentInit, OnDestroy {
+export class SelectComponent<T>
+  implements OnInit, AfterContentInit, OnDestroy, OnChanges
+{
   @Input()
   label = 'helo';
+
+  @Input()
+  displayWith: ((value: T) => string | number) | null = null;
+
+  @Input()
+  compareWith: (v1: T | null, v2: T | null) => boolean = (v1, v2) => v1 === v2;
 
   @Input()
   set value(value: T | null) {
@@ -82,9 +92,17 @@ export class SelectComponent<T> implements OnInit, AfterContentInit, OnDestroy {
   @ContentChildren(OptionComponent, { descendants: true })
   options!: QueryList<OptionComponent<T>>;
 
+  private optionMap = new Map<T | null, OptionComponent<T>>();
+
   private unsubscribe$ = new Subject<void>();
 
   constructor(private cd: ChangeDetectorRef, private hostEl: ElementRef) {}
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['compareWith']) {
+      this.selectionModel.compareWith = changes['compareWith'].currentValue;
+      this.highlightSelectedOptions();
+    }
+  }
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
@@ -94,20 +112,32 @@ export class SelectComponent<T> implements OnInit, AfterContentInit, OnDestroy {
     this.selectionModel.changed
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((values) => {
-        values.removed.forEach((rv) => this.findOptionsByValue(rv)?.deselect());
+        values.removed.forEach((rv) => this.optionMap.get(rv)?.deselect());
         values.added.forEach((rv) =>
-          this.findOptionsByValue(rv)?.highlightAsSelected()
+          this.optionMap.get(rv)?.highlightAsSelected()
         );
       });
     this.options.changes
       .pipe(
         startWith<QueryList<OptionComponent<T>>>(this.options),
-        tap(() =>
-          queueMicrotask(() => this.highlightSelectedOptions(this.value))
-        ),
+        tap(() => this.refreshOptionsMap()),
+        tap(() => queueMicrotask(() => this.highlightSelectedOptions())),
         switchMap((options) => merge(...options.map((o) => o.selected)))
       )
       .subscribe((selectedOption) => this.handleSelection(selectedOption));
+  }
+  protected get displayValue() {
+    if (this.displayWith && this.value) {
+      if (Array.isArray(this.value)) {
+        return this.value.map(this.displayWith);
+      }
+      return this.displayWith(this.value);
+    }
+    return this.value;
+  }
+  private refreshOptionsMap() {
+    this.optionMap.clear();
+    this.options.forEach((o) => this.optionMap.set(o.value, o));
   }
   private handleSelection(option: OptionComponent<T>) {
     if (option.value) {
@@ -129,11 +159,23 @@ export class SelectComponent<T> implements OnInit, AfterContentInit, OnDestroy {
     }
   }
 
-  private highlightSelectedOptions(value: T | null) {
-    this.findOptionsByValue(value)?.highlightAsSelected();
+  private highlightSelectedOptions() {
+    const valuesWithUpdatedReferences = this.selectionModel.selected.map(
+      (value) => {
+        const correspondingOption = this.findOptionsByValue(value);
+        return correspondingOption ? correspondingOption.value! : value;
+      }
+    );
+    this.selectionModel.clear();
+    this.selectionModel.select(...valuesWithUpdatedReferences);
   }
 
   private findOptionsByValue(value: T | null) {
-    return this.options && this.options.find((o) => o.value === value);
+    if (this.optionMap.has(value)) {
+      return this.optionMap.get(value);
+    }
+    return (
+      this.options && this.options.find((o) => this.compareWith(o.value, value))
+    );
   }
 }
