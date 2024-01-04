@@ -1,4 +1,3 @@
-hih
 <app-select
   [displayWith]="sisolayWithFn"
   [compareWith]="compareWithFn"
@@ -8,7 +7,7 @@ hih
   <app-option [filter]="true">
     <input #input type="text" placeholder="hi" />
   </app-option>
-  <app-option *ngFor="let user of users" [value]="user">{{
+  <app-option *ngFor="let user of users | async" [value]="user">{{
     user.name
   }}</app-option>
 </app-select>

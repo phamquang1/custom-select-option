@@ -14,7 +14,12 @@
   (backdropClick)="close()"
   (detach)="close()"
 >
-  <div class="panel">
+  <div
+    class="panel scroll-main"
+    cdkScrollable
+    scrollTracker
+    (scrolledToBottom)="onScrollToBottom()"
+  >
     <ng-content></ng-content>
   </div>
 </ng-template>

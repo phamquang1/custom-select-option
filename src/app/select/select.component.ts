@@ -78,6 +78,7 @@ export class SelectComponent<T>
     this.setupValue(value);
     this.onChange(this.value);
     this.highlightSelectedOptions();
+    this.cd.markForCheck();
   }
   get value() {
     if (this.selectionModel.isEmpty()) {
@@ -149,6 +150,7 @@ export class SelectComponent<T>
   }
   setDisabledState?(isDisabled: boolean): void {}
   ngOnChanges(changes: SimpleChanges): void {
+    console.log(changes);
     if (changes['compareWith']) {
       this.selectionModel.compareWith = changes['compareWith'].currentValue;
       this.highlightSelectedOptions();
@@ -244,5 +246,11 @@ export class SelectComponent<T>
         this.selectionModel.select(value);
       }
     }
+  }
+
+  onScrollToBottom(): void {
+    // Do something when the user scrolls to the bottom of the div
+    console.log('Scrolled to the bottom of the div');
+    // Add your logic or function call here
   }
 }
