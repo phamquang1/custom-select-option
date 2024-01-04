@@ -1,0 +1,23 @@
+:host {
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+    border: var(--color-text, #ccc) solid 2px;
+    padding: 5px 10px;
+    box-sizing: border-box;
+    border-radius: var(--border-radius, 10px);
+    min-width: 250px;
+}
+
+.panel {
+    min-width: 250px;
+    padding: 5px 10px;
+    box-sizing: border-box;
+    border-radius: var(--border-radius, 10px);
+    border: var(--color-text, #ccc) solid 2px;
+    background-color: #fff;
+    transform-origin: top;
+    min-height: 45px;
+    max-height: 180px;
+    overflow: auto;
+  }

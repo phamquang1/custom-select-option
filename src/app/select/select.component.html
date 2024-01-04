@@ -1,0 +1,20 @@
+<div class="label">{{ label }}</div>
+<div class="control" cdkOverlayOrigin #origin="cdkOverlayOrigin">
+  <div class="selected-value">{{ value }}</div>
+</div>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="origin"
+  [cdkConnectedOverlayOpen]="isOpen"
+  [cdkConnectedOverlayOffsetY]="8"
+  [cdkConnectedOverlayOffsetX]="-11"
+  cdkConnectedOverlayHasBackdrop
+  cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+  (backdropClick)="close()"
+  (detach)="close()"
+>
+  <div class="panel">
+    <ng-content></ng-content>
+  </div>
+</ng-template>
